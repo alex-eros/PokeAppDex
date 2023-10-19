@@ -1,20 +1,37 @@
 package alex.eros.pokeappdex
 
+import alex.eros.pokeappdex.login.viewModels.LoginViewModel
+import alex.eros.pokeappdex.login.viewModels.RecoveryPassViewModel
+import alex.eros.pokeappdex.login.viewModels.RegisterViewModel
+import alex.eros.pokeappdex.navigation.AppLoginNavigation
+import alex.eros.pokeappdex.splash.viewModels.SplashViewModel
+import alex.eros.pokeappdex.ui.HomeActivity
+import alex.eros.pokeappdex.ui.theme.PokeAppDexTheme
+import android.content.Intent
 import android.os.Bundle
+import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import alex.eros.pokeappdex.ui.theme.PokeAppDexTheme
+import androidx.lifecycle.Observer
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var window: Window
+    val loginViewModel: LoginViewModel by viewModels()
+    val registerViewModel:RegisterViewModel by viewModels()
+    val splashViewModel:SplashViewModel by viewModels ()
+    val recoveryPassViewModel:RecoveryPassViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        init()
         setContent {
             PokeAppDexTheme {
                 // A surface container using the 'background' color from the theme
@@ -22,22 +39,44 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Greeting("Android")
+                   AppLoginNavigation(
+                       loginViewModel = loginViewModel,
+                       registerViewModel = registerViewModel,
+                       splashViewModel = splashViewModel,
+                       recoveryPassViewModel = recoveryPassViewModel
+                   )
                 }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
+    fun init(){
+        window = this.getWindow()
+        splashViewModel.doLogin.observe(this, Observer {doLogin ->
+            if (doLogin){
+                launchHome()
+            }
+        })
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    PokeAppDexTheme {
-        Greeting("Android")
+        loginViewModel.doLogin.observe(this, Observer {doLogin ->
+            if (doLogin){
+              launchHome()
+            }
+        })
+
+        registerViewModel.doLogin.observe(this, Observer {doLogin ->
+            if (doLogin){
+                launchHome()
+            }
+        })
+
     }
+
+    fun launchHome(){
+        val intent = Intent(this,HomeActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+
 }
