@@ -4,6 +4,9 @@ import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
 import alex.eros.pokeappdex.navigation.Routes
 import alex.eros.pokeappdex.login.viewModels.LoginViewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -41,10 +45,11 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val buttonState:Boolean by loginViewModel.buttonState.observeAsState(initial = true)
     val loadingAnimation by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.animation_lma3v0kz))
     val showAnimation:Boolean by loginViewModel.showAnimation.observeAsState(false)
-    val showErrorMessage:Boolean by loginViewModel.showErrorMessage.observeAsState(false)
+    val showDialog:Boolean by loginViewModel.showDialog.observeAsState(false)
     val isInvalidDataEmail:Boolean by loginViewModel.isInvalidDataEmail.observeAsState(false)
     val isInvalidDataPassWord:Boolean by loginViewModel.isInvalidDataPassWord.observeAsState(false)
-    val exceptionMessage:String by loginViewModel.exceptionMessage.observeAsState("Ha ocurrido un error")
+    val isErrorMessage:Boolean by loginViewModel.isErrorMessage.observeAsState(false)
+    val dialogMessage:String by loginViewModel.dialogMessage.observeAsState("Mensaje")
     val showErrorInvalidEmail:String by loginViewModel.showErrorInvalidEMail.observeAsState("Enter your registered email")
     val showErrorInvalidPassWord:String by loginViewModel.showErrorInvalidPassWord.observeAsState("Enter your registered password")
     var showPassWord by rememberSaveable { mutableStateOf(false) }
@@ -245,7 +250,9 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                                 fontSize = 14.sp,
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(end = 28.dp).clickable { navController.navigate(Routes.RecoveryPassScreen.route) }
+                                modifier = Modifier
+                                    .padding(end = 28.dp)
+                                    .clickable { navController.navigate(Routes.RecoveryPassScreen.route) }
                             )
                         }
                         Spacer(modifier = Modifier.height(32.dp))
@@ -267,18 +274,22 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 }
             }
         }
-        if (showErrorMessage){
-            Box(modifier = Modifier
-                .constrainAs(errorMessage) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-                .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)) {
-                ErroMsgDialog(exceptionMessage)
+        Box(modifier = Modifier
+            .constrainAs(errorMessage) {
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+            .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)
+            .shadow(8.dp)
+        ) {
+            AnimatedVisibility(
+                visible = showDialog,
+                enter = fadeIn() + expandHorizontally()
+            ) {
+                ErroMsgDialog(dialogMessage,isErrorMessage)
             }
         }
     }
-
 
 }

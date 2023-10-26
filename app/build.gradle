@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'alex.eros.pokeappdex'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "alex.eros.pokeappdex"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -72,7 +72,7 @@ dependencies {
 
 
     /*Navegacion en JetPackCompose*/
-    implementation "androidx.navigation:navigation-compose:2.6.0"
+    implementation "androidx.navigation:navigation-compose:2.7.4"
 
     /*ConstraintLayout en compose*/
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha10"

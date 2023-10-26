@@ -23,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    val TAG = MainActivity::class.java.simpleName
     private lateinit var window: Window
     val loginViewModel: LoginViewModel by viewModels()
     val registerViewModel:RegisterViewModel by viewModels()
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
                        loginViewModel = loginViewModel,
                        registerViewModel = registerViewModel,
                        splashViewModel = splashViewModel,
-                       recoveryPassViewModel = recoveryPassViewModel
+                       recoveryPassViewModel = recoveryPassViewModel,
                    )
                 }
             }

@@ -3,6 +3,9 @@ package alex.eros.pokeappdex.login.ui
 import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
 import alex.eros.pokeappdex.login.viewModels.RecoveryPassViewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -33,9 +37,10 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
     val buttonState:Boolean by recoveryPassViewModel.buttonState.observeAsState(initial = true)
     val loadingAnimation by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.animation_lma3v0kz))
     val showAnimation:Boolean by recoveryPassViewModel.showAnimation.observeAsState(false)
-    val showErrorMessage:Boolean by recoveryPassViewModel.showErrorMessage.observeAsState(false)
     val isInvalidDataEmail:Boolean by recoveryPassViewModel.isInvalidDataEmail.observeAsState(false)
-    val exceptionMessage:String by recoveryPassViewModel.exceptionMessage.observeAsState("Ha ocurrido un error")
+    val showDialog:Boolean by recoveryPassViewModel.showDialog.observeAsState(false)
+    val isErrorMessage:Boolean by recoveryPassViewModel.isErrorMessage.observeAsState(false)
+    val dialogMessage:String by recoveryPassViewModel.dialogMessage.observeAsState("Mensaje")
     val showErrorInvalidEmail:String by recoveryPassViewModel.showErrorInvalidEMail.observeAsState("Enter your registered email")
     val progress by animateLottieCompositionAsState(composition = loadingAnimation, isPlaying = showAnimation, iterations = LottieConstants.IterateForever)
 
@@ -167,15 +172,20 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
                 }
             }
         }
-        if (showErrorMessage){
-            Box(modifier = Modifier
-                .constrainAs(errorMessage) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-                .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)) {
-                ErroMsgDialog(exceptionMessage)
+        Box(modifier = Modifier
+            .constrainAs(errorMessage) {
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+            .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)
+            .shadow(8.dp)
+        ) {
+            AnimatedVisibility(
+                visible = showDialog,
+                enter = fadeIn() + expandHorizontally()
+            ) {
+                ErroMsgDialog(dialogMessage,isErrorMessage)
             }
         }
     }

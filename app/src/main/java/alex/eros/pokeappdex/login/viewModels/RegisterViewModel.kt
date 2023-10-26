@@ -28,13 +28,14 @@ class RegisterViewModel @Inject constructor(
     * */
 
     private lateinit var timerError: CountDownTimer
-    private val errorTimerCountDownValue:Long = 10000
+    private val errorTimerCountDownValue:Long = 3000
     private var _gender:Int? = null
+    private var passWordErrorMessage = ""
 
-    private val _maleGenderCheck = MutableLiveData<Boolean>()
+    private val _maleGenderCheck = MutableLiveData(false)
     val  maleGenderCheck: LiveData<Boolean> = _maleGenderCheck
 
-    private val _girlGenderCheck = MutableLiveData<Boolean>()
+    private val _girlGenderCheck = MutableLiveData(false)
     val  girlGenderCheck:LiveData<Boolean> = _girlGenderCheck
 
     private val _nickName = MutableLiveData<String>()
@@ -52,39 +53,63 @@ class RegisterViewModel @Inject constructor(
     private val _showAnimation = MutableLiveData<Boolean>()
     val showAnimation:LiveData<Boolean> = _showAnimation
 
-    private val _showErrorMessage = MutableLiveData<Boolean>()
-    val showErrorMessage:LiveData<Boolean> = _showErrorMessage
+    private val _showDialog = MutableLiveData<Boolean>()
+    val showDialog:LiveData<Boolean> = _showDialog
 
-    private val _exceptionMessage = MutableLiveData<String>()
-    val exceptionMessage:LiveData<String> = _exceptionMessage
+    private val _isErrorMessage = MutableLiveData <Boolean>()
+    val isErrorMessage:LiveData<Boolean> = _isErrorMessage
+
+    private val _dialogMessage = MutableLiveData<String>()
+    val dialogMessage:LiveData<String> = _dialogMessage
+
+    private val _isInvalidDataEmail = MutableLiveData<Boolean>()
+    val isInvalidDataEmail:LiveData<Boolean> = _isInvalidDataEmail
+
+    private val _isInvalidDataPassWord = MutableLiveData<Boolean>()
+    val isInvalidDataPassWord:LiveData<Boolean> = _isInvalidDataPassWord
+
+    private val _isInvalidDataNickName = MutableLiveData<Boolean>()
+    val isInvalidDataNickName:LiveData<Boolean> = _isInvalidDataNickName
+
+    private val _showErrorInvalidEmail = MutableLiveData<String>()
+    val showErrorInvalidEMail:LiveData<String> = _showErrorInvalidEmail
+
+    private val _showErrorInvalidPassWord = MutableLiveData<String>()
+    val showErrorInvalidPassWord:LiveData<String> = _showErrorInvalidPassWord
+
+    private val _showErrorInvalidNickName = MutableLiveData<String>()
+    val showErrorInvalidNickname:LiveData<String> = _showErrorInvalidNickName
 
     private val _doLogin = MutableLiveData(false)
     val  doLogin: LiveData<Boolean> = _doLogin
 
     fun onRegisterChange(nickName:String, registeredEmail:String, registeredPassWord:String ){
         if (nickName.length <= 10) _nickName.value = nickName
-        if (registeredEmail.length <= 20) _registeredEmail.value = registeredEmail
+        _registeredEmail.value = registeredEmail
         if (registeredPassWord.length <= 12) _registeredPassword.value = registeredPassWord
-        enableButton(registeredEmail,registeredPassWord)
     }
 
     fun onCheckChanged(value:Boolean,gender:Int){
         _gender = gender
         when(gender){
             1 -> {
-                _maleGenderCheck.value = !value
-                _girlGenderCheck.value = value
+                if (_girlGenderCheck.value == true) _girlGenderCheck.value = false
+                else{
+                    _maleGenderCheck.value = !value
+                    _girlGenderCheck.value = value
+                }
             }
             0 -> {
-                _maleGenderCheck.value = value
-                _girlGenderCheck.value = !value
+                if (_maleGenderCheck.value == true) _maleGenderCheck.value = false
+                else{
+                    _maleGenderCheck.value = value
+                    _girlGenderCheck.value = !value
+                }
             }
         }
     }
 
     fun registerTrainer(){
-        if (_gender != null && !_nickName.value.isNullOrEmpty()){
-            _showAnimation.postValue(true)
             firebaseAuth.createUserWithEmailAndPassword(registeredEmail.value!!,registeredPassword.value!!)
                 .addOnCompleteListener { registerResult->
                     if (registerResult.isSuccessful){
@@ -96,14 +121,12 @@ class RegisterViewModel @Inject constructor(
                         doLogin()
                     }else{
                         setAnimationState(false)
-                        _exceptionMessage.postValue(registerResult.exception?.message)
-                        _showErrorMessage.value = true
+                        _dialogMessage.postValue(registerResult.exception?.message)
+                        _isErrorMessage.postValue(true)
+                        _showDialog.value = true
                         startTimerCountDown()
                     }
                 }
-        }else{
-            //TODO: Mandar mensaje de introduce tu genero o ingresa un nickmane valido
-        }
     }
 
     private fun setAnimationState(state:Boolean){
@@ -122,7 +145,7 @@ class RegisterViewModel @Inject constructor(
                 }
 
                 override fun onFinish() {
-                    _showErrorMessage.postValue(false)
+                    _showDialog.postValue(false)
                 }
             }
             timerError.start()
@@ -130,13 +153,109 @@ class RegisterViewModel @Inject constructor(
 
     }
 
-    private fun enableButton(email: String, password: String) {
-        _buttonRegisterState.value = !email.isNullOrBlank() && !password.isNullOrBlank() && password.length >10 && isValidEmailFormat(email)
+    fun verifyInfo(){
+        cleanValues()
+        enableButton(false)
+        setAnimationState(true)
+        var isGenderSelected = _maleGenderCheck.value!! || _girlGenderCheck.value!!
+        if (!isGenderSelected){
+            _dialogMessage.postValue("Choose a gender")
+            _showDialog.value = true
+            _isErrorMessage.value = true
+            startTimerCountDown()
+        }
+        if (_nickName.value.isNullOrEmpty()) setErrorNickName("Can´t be empty")
+
+        if (_registeredEmail.value.isNullOrBlank()){
+            setErrorEmail("Can't be empty")
+        }else if (!isValidEmailFormat(_registeredEmail.value)){
+            setErrorEmail("Invalid format")
+        }
+
+        if (_registeredPassword.value.isNullOrBlank()){
+            setErrorPassWord("Can't be empty")
+        }else if (!isValidPassWordFormat()){
+            setErrorPassWord(passWordErrorMessage)
+        }
+
+        if (_isInvalidDataEmail.value!! || _isInvalidDataPassWord.value!! || isInvalidDataNickName.value!! || !isGenderSelected){
+            setAnimationState(false)
+            enableButton(true)
+        }else registerTrainer()
+    }
+
+    private fun cleanValues() {
+        _isInvalidDataEmail.value = false
+        _isInvalidDataPassWord.value = false
+        _showErrorInvalidEmail.value = ""
+        _showErrorInvalidPassWord.value = ""
+        _isInvalidDataNickName.value = false
+        _showErrorInvalidNickName.value = ""
+    }
+
+    private fun setErrorEmail(message:String){
+        _isInvalidDataEmail.value = true
+        _showErrorInvalidEmail.value = message
+    }
+
+    private fun setErrorPassWord(message: String){
+        _isInvalidDataPassWord.value = true
+        _showErrorInvalidPassWord.value = message
+    }
+
+    private fun setErrorNickName(message: String){
+        _isInvalidDataNickName.value = true
+        _showErrorInvalidNickName.value = message
+    }
+
+    private fun enableButton(enable:Boolean) {
+        _buttonRegisterState.value = enable
     }
 
     private fun isValidEmailFormat(email: String?): Boolean =
         email?.let { Patterns.EMAIL_ADDRESS.matcher(email).matches() } ?: false
 
+    private fun isValidPassWordFormat():Boolean{
+        var hasCaptialLetter = false
+        var hasNumber = false
+        val isShortPassWord = _registeredPassword.value!!.length < 12
+
+        for( character in _registeredPassword.value!!){
+            if (character.isUpperCase()) hasCaptialLetter = true
+            if (character.isDigit()) hasNumber = true
+        }
+
+        passWordErrorMessage = when{
+            !hasCaptialLetter && !hasNumber && isShortPassWord -> "Short password, missing capital letter, missing number"
+            hasCaptialLetter && !hasNumber && !isShortPassWord  ->  "Missing Number"
+            !hasCaptialLetter && hasNumber && !isShortPassWord -> "Missing capital letter"
+            hasCaptialLetter && hasNumber && isShortPassWord -> "Short password"
+            !hasCaptialLetter && hasNumber && isShortPassWord -> "Short password, missing capital letter"
+            hasCaptialLetter && !hasNumber && isShortPassWord -> "Short password, missing number"
+            !hasCaptialLetter && !hasNumber && !isShortPassWord -> "Missing capital letter, missing number"
+            else -> ""
+        }
+
+        return (hasCaptialLetter && hasNumber && !isShortPassWord)
+    }
+
+    fun setOriginalValues(){
+        if (::timerError.isInitialized) timerError.cancel()
+        _maleGenderCheck.value = false
+        _girlGenderCheck.value = false
+        _registeredEmail.value = ""
+        _registeredPassword.value = ""
+        _nickName.value = ""
+        _buttonRegisterState.value = true
+        _showAnimation.value = false
+        _showDialog.value = false
+        _isInvalidDataPassWord.value = false
+        _isInvalidDataEmail.value = false
+        _isInvalidDataNickName.value = false
+        _showErrorInvalidEmail.value = "Enter a valid Email"
+        _showErrorInvalidPassWord.value = "Enter twelve characteres, at least one capital letter and one number"
+        _showErrorInvalidNickName.value = "At most twelve characteres"
+    }
 
 
 }

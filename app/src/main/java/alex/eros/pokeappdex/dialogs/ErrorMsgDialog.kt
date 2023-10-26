@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -17,19 +18,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ErroMsgDialog(msg:String){
+fun ErroMsgDialog(msg:String,isError:Boolean){
     Row(
         modifier = Modifier
             .background(
                 shape = RoundedCornerShape(9.dp),
-                color = Color(0xFFFF4757)
+                color = if(isError) Color(0xFFFF4757) else Color(0xFF595959)
             ),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
 
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(id = alex.eros.pokeappdex.R.drawable.ic_error_msg),
+            imageVector = if (isError) ImageVector.vectorResource(id = alex.eros.pokeappdex.R.drawable.ic_error_msg)
+            else ImageVector.vectorResource(id = alex.eros.pokeappdex.R.drawable.ic_check),
             contentDescription = "",
             tint = Color.White,
             modifier = Modifier
@@ -52,5 +54,5 @@ fun ErroMsgDialog(msg:String){
 @Preview(showSystemUi = true)
 @Composable
 fun ErroMsgDialog() {
-    ErroMsgDialog(msg = "Hola")
+    ErroMsgDialog(msg = "Hola",true)
 }

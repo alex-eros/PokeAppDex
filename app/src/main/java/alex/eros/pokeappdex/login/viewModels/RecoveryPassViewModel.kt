@@ -21,7 +21,7 @@ class RecoveryPassViewModel @Inject constructor(
     private val TAG = RecoveryPassViewModel::class.java.simpleName
 
     private lateinit var timerError: CountDownTimer
-    private val errorTimerCountDownValue:Long = 5000
+    private val errorTimerCountDownValue:Long = 3000
 
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
@@ -32,17 +32,21 @@ class RecoveryPassViewModel @Inject constructor(
     private val _showAnimation = MutableLiveData<Boolean>()
     val showAnimation:LiveData<Boolean> = _showAnimation
 
-    private val _showErrorMessage = MutableLiveData<Boolean>()
-    val showErrorMessage:LiveData<Boolean> = _showErrorMessage
-
     private val _isInvalidDataEmail = MutableLiveData<Boolean>()
     val isInvalidDataEmail:LiveData<Boolean> = _isInvalidDataEmail
 
     private val _showErrorInvalidEmail = MutableLiveData<String>()
     val showErrorInvalidEMail:LiveData<String> = _showErrorInvalidEmail
 
-    private val _exceptionMessage = MutableLiveData<String>()
-    val exceptionMessage:LiveData<String> = _exceptionMessage
+    private val _showDialog = MutableLiveData<Boolean>()
+    val showDialog:LiveData<Boolean> = _showDialog
+
+    private val _isErrorMessage = MutableLiveData <Boolean>()
+    val isErrorMessage:LiveData<Boolean> = _isErrorMessage
+
+    private val _dialogMessage = MutableLiveData<String>()
+    val dialogMessage:LiveData<String> = _dialogMessage
+
 
     fun onEmailChanged(email: String) {
         _email.value = email
@@ -55,7 +59,7 @@ class RecoveryPassViewModel @Inject constructor(
                 }
 
                 override fun onFinish() {
-                    _showErrorMessage.postValue(false)
+                    _showDialog.postValue(false)
                 }
             }
             timerError.start()
@@ -83,13 +87,16 @@ class RecoveryPassViewModel @Inject constructor(
                 if (sendEmailResult.isSuccessful){
                     _showAnimation.value = false
                     _buttonState.value = true
-                    //TODO: Show success message
+                    _showDialog.value = true
+                    _isErrorMessage.value = false
+                    _dialogMessage.postValue("Email sent succesfully")
                 }else{
                     _showAnimation.value = false
                     Log.e(TAG,"[loginTrainer] Ex:${sendEmailResult.exception?.message}")
-                    _exceptionMessage.postValue(sendEmailResult.exception?.message)
+                    _dialogMessage.postValue(sendEmailResult.exception?.message)
                     //TODO: Agregar mensajes cortos y descriptivos, para mostrar al usuario
-                    _showErrorMessage.value = true
+                    _showDialog.value = true
+                    _isErrorMessage.value = true
                     startTimerCountDown()
                    _buttonState.value = true
                 }
@@ -107,6 +114,16 @@ class RecoveryPassViewModel @Inject constructor(
     private fun cleanValues() {
         _isInvalidDataEmail.value = false
         _showErrorInvalidEmail.value = ""
+    }
+
+    fun setOriginalValues(){
+        if(::timerError.isInitialized) timerError.cancel()
+        _email.value = ""
+        _buttonState.value = true
+        _showAnimation.value = false
+        _showDialog.value = false
+        _isInvalidDataEmail.value = false
+        _showErrorInvalidEmail.value = "Enter your registered email"
     }
 
 }

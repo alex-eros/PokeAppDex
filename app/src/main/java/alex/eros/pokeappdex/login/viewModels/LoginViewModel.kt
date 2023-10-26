@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.concurrent.timer
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -22,7 +23,7 @@ class LoginViewModel @Inject constructor(
     private val TAG = LoginViewModel::class.simpleName
 
     private lateinit var timerError: CountDownTimer
-    private val errorTimerCountDownValue:Long = 5000
+    private val errorTimerCountDownValue:Long = 3000
 
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
@@ -36,11 +37,14 @@ class LoginViewModel @Inject constructor(
     private val _showAnimation = MutableLiveData<Boolean>()
     val showAnimation:LiveData<Boolean> = _showAnimation
 
-    private val _showErrorMessage = MutableLiveData<Boolean>()
-    val showErrorMessage:LiveData<Boolean> = _showErrorMessage
+    private val _showDialog = MutableLiveData<Boolean>()
+    val showDialog:LiveData<Boolean> = _showDialog
 
-    private val _exceptionMessage = MutableLiveData<String>()
-    val exceptionMessage:LiveData<String> = _exceptionMessage
+    private val _isErrorMessage = MutableLiveData <Boolean>()
+    val isErrorMessage:LiveData<Boolean> = _isErrorMessage
+
+    private val _dialogMessage = MutableLiveData<String>()
+    val dialogMessage:LiveData<String> = _dialogMessage
 
     private val _doLogin = MutableLiveData(false)
     val  doLogin: LiveData<Boolean> = _doLogin
@@ -73,9 +77,9 @@ class LoginViewModel @Inject constructor(
                 }else{
                     setAnimationState(false)
                     Log.e(TAG,"[loginTrainer] Ex:${loginResult.exception?.message}")
-                    _exceptionMessage.postValue(loginResult.exception?.message)
+                    _dialogMessage.postValue(loginResult.exception?.message)
                     //TODO: Agregar mensajes cortos y descriptivos, para mostrar al usuario
-                    _showErrorMessage.value = true
+                    _showDialog.value = true
                     startTimerCountDown()
                     enableButton(true)
                 }
@@ -98,7 +102,7 @@ class LoginViewModel @Inject constructor(
                 }
 
                 override fun onFinish() {
-                    _showErrorMessage.postValue(false)
+                    _showDialog.postValue(false)
                 }
             }
             timerError.start()
@@ -157,5 +161,18 @@ class LoginViewModel @Inject constructor(
         _isInvalidDataPassWord.value = true
         _showErrorInvalidPassWord.value = message
     }
+
+    fun setOriginalValues() {
+        if (::timerError.isInitialized) timerError.cancel()
+        _email.value = ""
+        _password.value = ""
+        _showAnimation.value = false
+        _isInvalidDataPassWord.value = false
+        _isInvalidDataEmail.value = false
+        _showErrorInvalidPassWord.value = "Enter your registered password"
+        _showErrorInvalidEmail.value = "Enter your regitered email"
+        _showDialog.value = false
+    }
+
 
 }
