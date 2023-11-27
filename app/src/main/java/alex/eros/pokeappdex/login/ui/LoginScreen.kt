@@ -54,6 +54,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val showErrorInvalidPassWord:String by loginViewModel.showErrorInvalidPassWord.observeAsState("Enter your registered password")
     var showPassWord by rememberSaveable { mutableStateOf(false) }
     val progress by animateLottieCompositionAsState(composition = loadingAnimation, isPlaying = showAnimation, iterations = LottieConstants.IterateForever)
+    val keepSessionActive:Boolean by loginViewModel.keepSessionActive.observeAsState(initial = false)
 
     ConstraintLayout(Modifier.fillMaxSize()){
 
@@ -69,7 +70,10 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     end.linkTo(parent.end)
                 },
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+            ) {
                 Row(modifier = Modifier
                     .weight(3f)
                     .padding(top = 12.dp)) {
@@ -101,7 +105,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                             painter = painterResource(id = R.drawable.poke_ball),
                             contentDescription = "header login section",
                             modifier = Modifier
-                                .size(84.dp)
+                                .size(74.dp)
                         )
                         Row(modifier = Modifier
                             .padding(bottom = 14.dp)
@@ -238,12 +242,16 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(
-                            horizontalArrangement = Arrangement.End,
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 4.dp)
+                                .padding(top = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         )
                         {
+                            CheckBoxTextReverse(tittle = "Remember me?", checkValue = keepSessionActive) { isActive ->
+                                loginViewModel.rememberSession(isActive)
+                            }
                             Text(
                                 text = "Forgot your password?",
                                 color = Color(0xFF595959),
@@ -255,7 +263,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                                     .clickable { navController.navigate(Routes.RecoveryPassScreen.route) }
                             )
                         }
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         Row(  horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()) {
                             Button(
@@ -292,4 +300,29 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
         }
     }
 
+}
+
+@Composable
+fun CheckBoxTextReverse(tittle: String, checkValue: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = 16.dp)
+    ) {
+        Checkbox(
+            checked = checkValue, onCheckedChange = { onChange(it) },
+            colors = CheckboxDefaults.colors(
+                uncheckedColor = Color.Black,
+                checkedColor = Color.LightGray
+            ),
+            modifier = Modifier.padding(end = 0.dp)
+        )
+        Text(
+            text = tittle, fontSize = 14.sp,
+            color = Color(0xFF595959),
+            fontWeight = FontWeight.Bold,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier.padding(start = 0.dp)
+        )
+    }
 }

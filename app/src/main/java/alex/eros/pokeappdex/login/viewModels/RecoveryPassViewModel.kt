@@ -90,6 +90,7 @@ class RecoveryPassViewModel @Inject constructor(
                     _showDialog.value = true
                     _isErrorMessage.value = false
                     _dialogMessage.postValue("Email sent succesfully")
+                    startTimerCountDown()
                 }else{
                     _showAnimation.value = false
                     Log.e(TAG,"[loginTrainer] Ex:${sendEmailResult.exception?.message}")

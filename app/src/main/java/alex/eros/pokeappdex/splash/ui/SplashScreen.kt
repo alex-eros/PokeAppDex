@@ -32,11 +32,9 @@ fun SplashScreen(navController:NavController,splashViewModel:SplashViewModel){
           navController.popBackStack()
           navController.navigate(Routes.LoginScreen.route)
       }else{
-          //TODO:Descomentar para funcionamiento correcto
-          //splashViewModel.doLogin()
           delay(2000)
           navController.popBackStack()
-          navController.navigate(Routes.LoginScreen.route)
+          splashViewModel.doLogin()
       }
     }
 

@@ -1,5 +1,8 @@
 package alex.eros.pokeappdex.login.viewModels
 
+import alex.eros.pokeappdex.utils.Cons
+import alex.eros.pokeappdex.utils.SharedPrefs
+import android.app.Application
 import android.os.CountDownTimer
 import android.util.Log
 import android.util.Patterns
@@ -13,11 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.concurrent.timer
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val application:Application
 ) : ViewModel() {
 
     private val TAG = LoginViewModel::class.simpleName
@@ -61,9 +64,17 @@ class LoginViewModel @Inject constructor(
     private val _showErrorInvalidPassWord = MutableLiveData<String>()
     val showErrorInvalidPassWord:LiveData<String> = _showErrorInvalidPassWord
 
+    private val _keepSesionActive = MutableLiveData(false)
+    val keepSessionActive:LiveData<Boolean> = _keepSesionActive
+
+
     fun onLoginChanged(email: String, password: String) {
         _email.value = email
        if (password.length <= 12) _password.value = password
+    }
+
+    fun rememberSession(isActive:Boolean){
+        _keepSesionActive.value = isActive
     }
 
 
@@ -71,14 +82,16 @@ class LoginViewModel @Inject constructor(
         firebaseAuth.signInWithEmailAndPassword(_email.value!!, _password.value!!)
             .addOnCompleteListener { loginResult ->
                 if (loginResult.isSuccessful){
+                    SharedPrefs.saveData(application,Cons.REMEMBER_SESSION,_keepSesionActive.value!!)
                     setAnimationState(false)
                     enableButton(true)
                     doLogin()
                 }else{
-                    setAnimationState(false)
-                    Log.e(TAG,"[loginTrainer] Ex:${loginResult.exception?.message}")
-                    _dialogMessage.postValue(loginResult.exception?.message)
                     //TODO: Agregar mensajes cortos y descriptivos, para mostrar al usuario
+                    Log.e(TAG,"[loginTrainer] Ex:${loginResult.exception?.message}")
+                    setAnimationState(false)
+                    _dialogMessage.postValue(loginResult.exception?.message)
+                    _isErrorMessage.value = true
                     _showDialog.value = true
                     startTimerCountDown()
                     enableButton(true)

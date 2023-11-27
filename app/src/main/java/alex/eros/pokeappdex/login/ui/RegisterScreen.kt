@@ -78,7 +78,10 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
                     end.linkTo(parent.end)
                 }
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

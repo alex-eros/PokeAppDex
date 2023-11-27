@@ -22,11 +22,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun AppLoginNavigation(loginViewModel:LoginViewModel,registerViewModel: RegisterViewModel, splashViewModel: SplashViewModel,recoveryPassViewModel: RecoveryPassViewModel){
+fun AppLoginNavigation(loginViewModel:LoginViewModel,registerViewModel: RegisterViewModel, splashViewModel: SplashViewModel,recoveryPassViewModel: RecoveryPassViewModel,initialScreen:String){
     val TAG = "AppLoginNavigation"
     var previusRoute by rememberSaveable { mutableStateOf("") }
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Routes.SplashScreen.route){
+    NavHost(navController = navController, startDestination =initialScreen){
         composable(Routes.SplashScreen.route){ SplashScreen(navController, splashViewModel = splashViewModel ) }
         composable(Routes.LoginScreen.route){ LoginScreen(navController = navController, loginViewModel = loginViewModel) }
         composable(Routes.RegisterScreen.route,

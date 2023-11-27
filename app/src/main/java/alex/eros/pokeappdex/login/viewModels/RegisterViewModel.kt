@@ -3,16 +3,16 @@ package alex.eros.pokeappdex.login.viewModels
 import alex.eros.pokeappdex.utils.Cons
 import alex.eros.pokeappdex.utils.SharedPrefs
 import android.app.Application
-import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,13 +20,15 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val application:Application
+    private val application:Application,
+    private val db:FirebaseFirestore
 ):ViewModel() {
     /*Gender
     0: Male
     1: Female
     * */
 
+    private val TAG = RegisterViewModel::class.java.simpleName
     private lateinit var timerError: CountDownTimer
     private val errorTimerCountDownValue:Long = 3000
     private var _gender:Int? = null
@@ -114,10 +116,8 @@ class RegisterViewModel @Inject constructor(
                 .addOnCompleteListener { registerResult->
                     if (registerResult.isSuccessful){
                         setAnimationState(false)
-                        with(SharedPrefs){
-                            saveData(application.applicationContext,Cons.TRAINER_GENDER,_gender!!)
-                            saveData(application.applicationContext,Cons.TRAINER_NICKNAME,_nickName.value!!)
-                        }
+                        saveUserDataShared()
+                        saveUserDataRemoteDB()
                         doLogin()
                     }else{
                         setAnimationState(false)
@@ -129,8 +129,35 @@ class RegisterViewModel @Inject constructor(
                 }
     }
 
+    private fun saveUserDataRemoteDB() {
+        val currentUserUID = firebaseAuth.currentUser?.uid
+        if (currentUserUID != null){
+            val userData = hashMapOf(
+                "nickname" to _nickName.value,
+                "gender" to _gender
+            )
+            val users = db.collection("Users")
+            users.document(currentUserUID).set(userData)
+        }
+        else {
+            Log.d(TAG,"[saveUserDataRemoteDB] there isn´t a user")
+            return
+        }
+    }
+
     private fun setAnimationState(state:Boolean){
         _showAnimation.postValue(state)
+    }
+
+     private fun saveUserDataShared(){
+        try {
+            with(SharedPrefs){
+                saveData(application.applicationContext,Cons.CURRENT_TRAINER_GENDER,_gender!!)
+                saveData(application.applicationContext,Cons.CURRENT_TRAINER_NICKNAME,_nickName.value!!)
+            }
+        }catch (ex:Exception){
+            Log.d(TAG,"[saveUserDataShared] Error:${ex.message} ")
+        }
     }
 
     fun doLogin(){
@@ -157,7 +184,7 @@ class RegisterViewModel @Inject constructor(
         cleanValues()
         enableButton(false)
         setAnimationState(true)
-        var isGenderSelected = _maleGenderCheck.value!! || _girlGenderCheck.value!!
+        val isGenderSelected = _maleGenderCheck.value!! || _girlGenderCheck.value!!
         if (!isGenderSelected){
             _dialogMessage.postValue("Choose a gender")
             _showDialog.value = true

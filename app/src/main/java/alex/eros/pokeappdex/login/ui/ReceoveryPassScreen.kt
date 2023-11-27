@@ -58,7 +58,10 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
                     end.linkTo(parent.end)
                 },
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+            ) {
                 Row(modifier = Modifier
                     .weight(3f)
                     .padding(top = 12.dp)) {
