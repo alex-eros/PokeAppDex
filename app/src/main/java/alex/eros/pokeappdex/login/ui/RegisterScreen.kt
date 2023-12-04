@@ -3,6 +3,7 @@ package alex.eros.pokeappdex.login.ui
 import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
 import alex.eros.pokeappdex.login.viewModels.RegisterViewModel
+import alex.eros.pokeappdex.utils.ScreenMetrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
@@ -63,6 +64,7 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
     val showErrorInvalidPassWord:String by registerViewModel.showErrorInvalidPassWord.observeAsState("Enter twelve characteres, at least one capital letter and one number")
     val showErrorInvalidNickName:String by registerViewModel.showErrorInvalidNickname.observeAsState("At most twelve characteres")
     var showPassWord by rememberSaveable { mutableStateOf(false) }
+    val marginVertical = ScreenMetrics.convertPercentageInDPforScreenHeight(3)
 
     ConstraintLayout(Modifier.fillMaxSize()) {
 
@@ -80,7 +82,7 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+                modifier = Modifier.padding(vertical = marginVertical.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -366,7 +368,7 @@ fun RegisterScreen(navController: NavController, registerViewModel: RegisterView
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }
-            .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)
+            .padding(bottom = 48.dp, start = 40.dp, end = 40.dp)
             .shadow(8.dp)
         ) {
             AnimatedVisibility(

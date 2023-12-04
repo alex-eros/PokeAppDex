@@ -4,20 +4,19 @@ import alex.eros.pokeappdex.MainActivity
 import alex.eros.pokeappdex.home.HomeViewModel
 import alex.eros.pokeappdex.navigation.AppHomeNavigation
 import alex.eros.pokeappdex.ui.theme.PokeAppDexTheme
-import alex.eros.pokeappdex.utils.Cons
-import alex.eros.pokeappdex.utils.SharedPrefs
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.core.view.WindowCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -30,15 +29,20 @@ class HomeActivity : ComponentActivity() {
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         initObservers()
         homeViewModel.getUserInfo()
         setContent {
             PokeAppDexTheme {
+                val systemUiController = rememberSystemUiController()
+                SideEffect {
+                    // set transparent color behind the status bar
+                    systemUiController.setStatusBarColor(color = Color.Transparent)
+                }
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     AppHomeNavigation(homeViewModel)
                 }

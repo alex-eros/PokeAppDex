@@ -8,10 +8,9 @@ import alex.eros.pokeappdex.navigation.Routes
 import alex.eros.pokeappdex.splash.viewModels.SplashViewModel
 import alex.eros.pokeappdex.ui.HomeActivity
 import alex.eros.pokeappdex.ui.theme.PokeAppDexTheme
-import android.content.Context
+import alex.eros.pokeappdex.utils.ScreenMetrics
 import android.content.Intent
 import android.os.Bundle
-import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -22,7 +21,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.Observer
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,7 +42,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         init()
-        if (MainActivity.isFirstLogin) initialScreen = Routes.SplashScreen.route else initialScreen = Routes.LoginScreen.route
+        initialScreen = if (isFirstLogin) Routes.SplashScreen.route else Routes.LoginScreen.route
         setContent {
             PokeAppDexTheme {
                 val systemUiController = rememberSystemUiController()
@@ -68,28 +66,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun init(){
-        splashViewModel.doLogin.observe(this, Observer {doLogin ->
-            if (doLogin){
+    private fun init(){
+        ScreenMetrics.getScreenCharacteristics(this)
+        splashViewModel.doLogin.observe(this) { doLogin ->
+            if (doLogin) {
                 launchHome()
             }
-        })
+        }
 
-        loginViewModel.doLogin.observe(this, Observer {doLogin ->
-            if (doLogin){
-              launchHome()
-            }
-        })
-
-        registerViewModel.doLogin.observe(this, Observer {doLogin ->
-            if (doLogin){
+        loginViewModel.doLogin.observe(this) { doLogin ->
+            if (doLogin) {
                 launchHome()
             }
-        })
+        }
+
+        registerViewModel.doLogin.observe(this) { doLogin ->
+            if (doLogin) {
+                launchHome()
+            }
+        }
 
     }
 
-    fun launchHome(){
+    private fun launchHome(){
         val intent = Intent(this,HomeActivity::class.java)
         startActivity(intent)
         finish()

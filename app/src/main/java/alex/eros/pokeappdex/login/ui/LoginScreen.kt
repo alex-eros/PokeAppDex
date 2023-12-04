@@ -4,6 +4,7 @@ import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
 import alex.eros.pokeappdex.navigation.Routes
 import alex.eros.pokeappdex.login.viewModels.LoginViewModel
+import alex.eros.pokeappdex.utils.ScreenMetrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -36,7 +37,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 
-//TODO: ajustar el tamaño del lottie al del botón, ajustar animacion para repetirse indefinidamente
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
 
@@ -55,6 +55,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     var showPassWord by rememberSaveable { mutableStateOf(false) }
     val progress by animateLottieCompositionAsState(composition = loadingAnimation, isPlaying = showAnimation, iterations = LottieConstants.IterateForever)
     val keepSessionActive:Boolean by loginViewModel.keepSessionActive.observeAsState(initial = false)
+    val marginVertical = ScreenMetrics.convertPercentageInDPforScreenHeight(3)
 
     ConstraintLayout(Modifier.fillMaxSize()){
 
@@ -72,7 +73,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+                modifier = Modifier.padding(vertical = marginVertical.dp)
             ) {
                 Row(modifier = Modifier
                     .weight(3f)
@@ -288,7 +289,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }
-            .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)
+            .padding(bottom = 48.dp, start = 40.dp, end = 40.dp)
             .shadow(8.dp)
         ) {
             AnimatedVisibility(

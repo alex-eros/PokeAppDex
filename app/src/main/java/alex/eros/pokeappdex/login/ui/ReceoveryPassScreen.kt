@@ -3,6 +3,7 @@ package alex.eros.pokeappdex.login.ui
 import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
 import alex.eros.pokeappdex.login.viewModels.RecoveryPassViewModel
+import alex.eros.pokeappdex.utils.ScreenMetrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -43,6 +44,7 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
     val dialogMessage:String by recoveryPassViewModel.dialogMessage.observeAsState("Mensaje")
     val showErrorInvalidEmail:String by recoveryPassViewModel.showErrorInvalidEMail.observeAsState("Enter your registered email")
     val progress by animateLottieCompositionAsState(composition = loadingAnimation, isPlaying = showAnimation, iterations = LottieConstants.IterateForever)
+    val marginVertical = ScreenMetrics.convertPercentageInDPforScreenHeight(3)
 
     ConstraintLayout(Modifier.fillMaxSize()){
 
@@ -60,7 +62,7 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 34.dp, bottom = 38.dp)
+                modifier = Modifier.padding(vertical = marginVertical.dp)
             ) {
                 Row(modifier = Modifier
                     .weight(3f)
@@ -181,7 +183,7 @@ fun RecoveryPassScreen(navController: NavController, recoveryPassViewModel:Recov
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }
-            .padding(bottom = 20.dp, start = 40.dp, end = 40.dp)
+            .padding(bottom = 48.dp, start = 40.dp, end = 40.dp)
             .shadow(8.dp)
         ) {
             AnimatedVisibility(
