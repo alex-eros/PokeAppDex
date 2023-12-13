@@ -34,42 +34,17 @@ class HomeViewModel @Inject constructor(
         _launchHome.value = true
     }
 
-    fun getUserInfo(){
-        val currentUserUID = firebaseAuth.currentUser?.uid
-        if (currentUserUID != null){
-            val docRef = db.collection("Users").document(currentUserUID)
-            docRef.get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                        document.data?.get("nickname").let {
-                            _trainerNickName.value = it as String?
-                            Log.d(TAG, "Trainer Nickname: ${trainerNickName.value}")
-                        }
-                    } else {
-                        checkSavedUserNickName()
-                        Log.d(TAG, "No such document")
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d(TAG, "get failed with ", exception)
-                }
-        }else{
-            Log.d(TAG,"[init] there isn´t a user")
-            checkSavedUserNickName()
-            return
-        }
-       if (!keepSessionActive()) firebaseAuth.signOut()
+    //Mover
+    /* private fun checkSavedUserNickName(){
+         val nickName = SharedPrefs.getStringData(application, Cons.CURRENT_TRAINER_NICKNAME,"")
+         if (nickName.isNotEmpty()) _trainerNickName.value = nickName
+     }*/
+
+    fun keepSessionActive(){
+        if (!SharedPrefs.getBooleanData(application, Cons.REMEMBER_SESSION,false)) firebaseAuth.signOut()
     }
 
-    private fun keepSessionActive():Boolean{
-        return SharedPrefs.getBooleanData(application, Cons.REMEMBER_SESSION,false)
-    }
 
-    private fun checkSavedUserNickName(){
-      val nickName = SharedPrefs.getStringData(application,Cons.CURRENT_TRAINER_NICKNAME,"")
-      if (nickName.isNotEmpty()) _trainerNickName.value = nickName
-    }
 
 
 

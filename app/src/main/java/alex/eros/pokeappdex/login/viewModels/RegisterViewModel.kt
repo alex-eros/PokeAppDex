@@ -1,5 +1,6 @@
 package alex.eros.pokeappdex.login.viewModels
 
+import alex.eros.pokeappdex.splash.models.response.UserData
 import alex.eros.pokeappdex.utils.Cons
 import alex.eros.pokeappdex.utils.SharedPrefs
 import android.app.Application
@@ -82,8 +83,8 @@ class RegisterViewModel @Inject constructor(
     private val _showErrorInvalidNickName = MutableLiveData<String>()
     val showErrorInvalidNickname:LiveData<String> = _showErrorInvalidNickName
 
-    private val _doLogin = MutableLiveData(false)
-    val  doLogin: LiveData<Boolean> = _doLogin
+    private val _doLogin = MutableLiveData<UserData>()
+    val  doLogin: LiveData<UserData> = _doLogin
 
     fun onRegisterChange(nickName:String, registeredEmail:String, registeredPassWord:String ){
         if (nickName.length <= 10) _nickName.value = nickName
@@ -111,7 +112,7 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    fun registerTrainer(){
+    private fun registerTrainer(){
             firebaseAuth.createUserWithEmailAndPassword(registeredEmail.value!!,registeredPassword.value!!)
                 .addOnCompleteListener { registerResult->
                     if (registerResult.isSuccessful){
@@ -160,8 +161,8 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    fun doLogin(){
-        _doLogin.postValue(true)
+    private fun doLogin(){
+        _doLogin.postValue(UserData(_nickName.value!!,_gender!!,true,null))
     }
 
     fun startTimerCountDown(){

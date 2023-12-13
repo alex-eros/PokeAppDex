@@ -5,6 +5,7 @@ import alex.eros.pokeappdex.login.viewModels.RecoveryPassViewModel
 import alex.eros.pokeappdex.login.viewModels.RegisterViewModel
 import alex.eros.pokeappdex.navigation.AppLoginNavigation
 import alex.eros.pokeappdex.navigation.Routes
+import alex.eros.pokeappdex.splash.models.response.UserData
 import alex.eros.pokeappdex.splash.viewModels.SplashViewModel
 import alex.eros.pokeappdex.ui.HomeActivity
 import alex.eros.pokeappdex.ui.theme.PokeAppDexTheme
@@ -31,12 +32,12 @@ class MainActivity : ComponentActivity() {
       var  isFirstLogin = true
     }
 
-    val TAG = MainActivity::class.java.simpleName
-    val loginViewModel: LoginViewModel by viewModels()
-    val registerViewModel:RegisterViewModel by viewModels()
-    val splashViewModel:SplashViewModel by viewModels ()
-    val recoveryPassViewModel:RecoveryPassViewModel by viewModels()
-    lateinit var initialScreen:String
+    private val TAG = MainActivity::class.java.simpleName
+    private val loginViewModel: LoginViewModel by viewModels()
+    private val registerViewModel:RegisterViewModel by viewModels()
+    private val splashViewModel:SplashViewModel by viewModels ()
+    private val recoveryPassViewModel:RecoveryPassViewModel by viewModels()
+    private lateinit var initialScreen:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -64,32 +65,35 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
 
     private fun init(){
         ScreenMetrics.getScreenCharacteristics(this)
         splashViewModel.doLogin.observe(this) { doLogin ->
-            if (doLogin) {
-                launchHome()
+            if (doLogin.success) {
+                launchHome(doLogin)
             }
         }
 
         loginViewModel.doLogin.observe(this) { doLogin ->
-            if (doLogin) {
-                launchHome()
+            if (doLogin.success) {
+               launchHome(doLogin)
             }
         }
 
         registerViewModel.doLogin.observe(this) { doLogin ->
-            if (doLogin) {
-                launchHome()
+            if (doLogin.success) {
+                launchHome(doLogin)
             }
         }
 
     }
 
-    private fun launchHome(){
+    private fun launchHome(userData: UserData){
         val intent = Intent(this,HomeActivity::class.java)
+        intent.putExtra("nickName",userData.userNickName)
+        intent.putExtra("gender",userData.gender)
         startActivity(intent)
         finish()
     }

@@ -22,20 +22,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
 
 @Composable
 fun SplashScreen(navController:NavController,splashViewModel:SplashViewModel){
     LaunchedEffect(key1 = true){
-      if (!splashViewModel.validateSession()){
-          delay(2000)
-          navController.popBackStack()
-          navController.navigate(Routes.LoginScreen.route)
-      }else{
-          delay(2000)
-          navController.popBackStack()
-          splashViewModel.doLogin()
-      }
+        val deferred1 = async { splashViewModel.getUserInfo() }
+        val response = deferred1.await()
+        if (response.success){
+            navController.popBackStack()
+            splashViewModel.doLogin(response)
+        }else {
+            navController.popBackStack()
+            navController.navigate(Routes.LoginScreen.route)
+        }
     }
 
     Box(

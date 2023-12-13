@@ -16,23 +16,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
 
     val TAG = HomeActivity::class.java.simpleName
-    val homeViewModel: HomeViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
 
-    @Inject
-    lateinit var firebaseAuth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         initObservers()
-        homeViewModel.getUserInfo()
+        intent
+        homeViewModel.keepSessionActive()
+        /*Recuperar los datos que viene en el Intent del MainActivity*/
         setContent {
             PokeAppDexTheme {
                 val systemUiController = rememberSystemUiController()
@@ -44,7 +42,7 @@ class HomeActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    AppHomeNavigation(homeViewModel)
+                    AppHomeNavigation(homeViewModel,intent)
                 }
             }
         }

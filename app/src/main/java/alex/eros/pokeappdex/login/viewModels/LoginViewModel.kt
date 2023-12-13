@@ -1,5 +1,6 @@
 package alex.eros.pokeappdex.login.viewModels
 
+import alex.eros.pokeappdex.splash.models.response.UserData
 import alex.eros.pokeappdex.utils.Cons
 import alex.eros.pokeappdex.utils.SharedPrefs
 import android.app.Application
@@ -11,15 +12,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
+    private val db: FirebaseFirestore,
     private val application:Application
 ) : ViewModel() {
 
@@ -49,8 +55,8 @@ class LoginViewModel @Inject constructor(
     private val _dialogMessage = MutableLiveData<String>()
     val dialogMessage:LiveData<String> = _dialogMessage
 
-    private val _doLogin = MutableLiveData(false)
-    val  doLogin: LiveData<Boolean> = _doLogin
+    private val _doLogin = MutableLiveData<UserData>()
+    val  doLogin: LiveData<UserData> = _doLogin
 
     private val _isInvalidDataEmail = MutableLiveData<Boolean>()
     val isInvalidDataEmail:LiveData<Boolean> = _isInvalidDataEmail
@@ -78,29 +84,64 @@ class LoginViewModel @Inject constructor(
     }
 
 
-    fun loginTrainer() {
-        firebaseAuth.signInWithEmailAndPassword(_email.value!!, _password.value!!)
-            .addOnCompleteListener { loginResult ->
-                if (loginResult.isSuccessful){
+    private fun loginTrainer() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val deferredUserData = async { getUserData() }.await()
+            if (deferredUserData.success){
+                withContext(Dispatchers.Main){
                     SharedPrefs.saveData(application,Cons.REMEMBER_SESSION,_keepSesionActive.value!!)
                     setAnimationState(false)
                     enableButton(true)
-                    doLogin()
-                }else{
+                    doLogin(deferredUserData)
+                }
+            }else{
+                withContext(Dispatchers.Main){
                     //TODO: Agregar mensajes cortos y descriptivos, para mostrar al usuario
-                    Log.e(TAG,"[loginTrainer] Ex:${loginResult.exception?.message}")
+                    Log.e(TAG,"[loginTrainer] Ex:${deferredUserData.message}")
                     setAnimationState(false)
-                    _dialogMessage.postValue(loginResult.exception?.message)
+                    _dialogMessage.postValue(deferredUserData.message)
                     _isErrorMessage.value = true
                     _showDialog.value = true
                     startTimerCountDown()
                     enableButton(true)
                 }
             }
+        }
     }
 
-    fun doLogin(){
-        _doLogin.postValue(true)
+    private suspend fun getUserData():UserData{
+        val userData = UserData(null,null,false,null)
+        try {
+            firebaseAuth.signInWithEmailAndPassword(_email.value!!, _password.value!!)
+                .addOnCompleteListener { loginResult ->
+                    if (loginResult.isSuccessful){
+                        userData.success = true
+                    }
+                }.await()
+        }catch (ex:Exception){
+            with(userData){
+                success = false
+                message = ex.message
+            }
+        }
+        if (userData.success){
+            db.collection("Users").document(firebaseAuth.currentUser!!.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.data != null) {
+                        Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                        with(document.data!!) {
+                            userData.userNickName = get("nickname") as String?
+                            Log.d(TAG, "Trainer Nickname: ${userData.userNickName}")
+                            userData.gender = get("gender").toString().toInt()
+                            Log.d(TAG, "Trainer Gender: ${userData.gender}")
+                        }
+                    }
+                }.await()
+        }
+        return userData
+    }
+    private fun doLogin(userData: UserData){
+        _doLogin.postValue(userData)
     }
 
     private fun setAnimationState(state:Boolean){
