@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "733376637170",
+    "project_id": "pokeappdex",
+    "storage_bucket": "pokeappdex.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733376637170:android:ac3b68209d9818bf39486b",
+        "android_client_info": {
+          "package_name": "alex.eros.pokeappdex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733376637170-ia7t5iq3v5llvenvikukla857nutljhr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM4qa2Q1-_ImRZemYUvVoXr3MD1SHCfs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733376637170-ia7t5iq3v5llvenvikukla857nutljhr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
