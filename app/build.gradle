@@ -2,8 +2,8 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id  'dagger.hilt.android.plugin'
-    id  'kotlin-kapt'
     id 'com.google.gms.google-services'
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
 }
 
 android {
@@ -41,7 +41,7 @@ android {
         viewBinding true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
+        kotlinCompilerExtensionVersion '1.5.2'
     }
     packagingOptions {
         resources {
@@ -88,8 +88,8 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
 
     /*Dagger Hilt*/
-    implementation "com.google.dagger:hilt-android:2.44"
-    kapt "com.google.dagger:hilt-android-compiler:2.44"
+    implementation "com.google.dagger:hilt-android:2.48"
+    ksp "com.google.dagger:hilt-android-compiler:2.48"
 
     /*Lottie*/
     implementation "com.airbnb.android:lottie-compose:6.0.0"
@@ -97,17 +97,4 @@ dependencies {
     /*System UI controller*/
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.30.1"
 
-    constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
-            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
-        }
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
-            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
-        }
-    }
-
-}
-
-kapt {
-    correctErrorTypes = true
 }
