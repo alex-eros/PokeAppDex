@@ -5,6 +5,8 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
 
+/***La funcion para la que fue creada esta clase lo hago ahora con compose
+ * Puede servir para calcular el tamaño de letras e imagenes*****/
 object ScreenMetrics {
     private val TAG = ScreenMetrics::class.java.simpleName
     private val displayMetrics = DisplayMetrics()

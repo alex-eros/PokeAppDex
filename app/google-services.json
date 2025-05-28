@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "733376637170",
     "project_id": "pokeappdex",
-    "storage_bucket": "pokeappdex.appspot.com"
+    "storage_bucket": "pokeappdex.firebasestorage.app"
   },
   "client": [
     {
@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "733376637170-ia7t5iq3v5llvenvikukla857nutljhr.apps.googleusercontent.com",
+          "client_id": "733376637170-71alrav5502ashmictg764ctke4te1o1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +27,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "733376637170-ia7t5iq3v5llvenvikukla857nutljhr.apps.googleusercontent.com",
+              "client_id": "733376637170-71alrav5502ashmictg764ctke4te1o1.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -1,10 +1,10 @@
 package alex.eros.pokeappdex.login.viewModels
 
+import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.splash.models.response.UserData
 import alex.eros.pokeappdex.utils.Cons
 import alex.eros.pokeappdex.utils.SharedPrefs
 import android.app.Application
-import android.os.CountDownTimer
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.LiveData
@@ -30,9 +30,7 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val TAG = LoginViewModel::class.simpleName
-
-    private lateinit var timerError: CountDownTimer
-    private val errorTimerCountDownValue:Long = 3000
+    private val errorTimeCountDownValue:Long = 5000
 
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
@@ -99,7 +97,7 @@ class LoginViewModel @Inject constructor(
                     //TODO: Agregar mensajes cortos y descriptivos, para mostrar al usuario
                     Log.e(TAG,"[loginTrainer] Ex:${deferredUserData.message}")
                     setAnimationState(false)
-                    _dialogMessage.postValue(deferredUserData.message)
+                    _dialogMessage.postValue(if (!deferredUserData.message.isNullOrEmpty()) deferredUserData.message else R.string.generic_error_message.toString())
                     _isErrorMessage.value = true
                     _showDialog.value = true
                     startTimerCountDown()
@@ -110,36 +108,36 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun getUserData():UserData{
-        val userData = UserData(null,null,false,null)
-        try {
+        val userData = UserData("",0,false,"")
+        return try {
             firebaseAuth.signInWithEmailAndPassword(_email.value!!, _password.value!!)
                 .addOnCompleteListener { loginResult ->
                     if (loginResult.isSuccessful){
                         userData.success = true
+                        db.collection("Users").document(firebaseAuth.currentUser!!.uid).get()
+                            .addOnSuccessListener { document ->
+                                if (document != null && document.data != null) {
+                                    Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                                    with(document.data!!) {
+                                        userData.userNickName = get("nickname") as String?
+                                        Log.d(TAG, "Trainer Nickname: ${userData.userNickName}")
+                                        userData.gender = get("gender").toString().toInt()
+                                        Log.d(TAG, "Trainer Gender: ${userData.gender}")
+                                    }
+                                }
+                            }
                     }
                 }.await()
+            userData
         }catch (ex:Exception){
             with(userData){
                 success = false
                 message = ex.message
             }
+            userData
         }
-        if (userData.success){
-            db.collection("Users").document(firebaseAuth.currentUser!!.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.data != null) {
-                        Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                        with(document.data!!) {
-                            userData.userNickName = get("nickname") as String?
-                            Log.d(TAG, "Trainer Nickname: ${userData.userNickName}")
-                            userData.gender = get("gender").toString().toInt()
-                            Log.d(TAG, "Trainer Gender: ${userData.gender}")
-                        }
-                    }
-                }.await()
-        }
-        return userData
     }
+
     private fun doLogin(userData: UserData){
         _doLogin.postValue(userData)
     }
@@ -148,20 +146,11 @@ class LoginViewModel @Inject constructor(
         _showAnimation.postValue(state)
     }
 
-    fun startTimerCountDown(){
-
-        viewModelScope.launch(Dispatchers.Main){
-            timerError = object : CountDownTimer(errorTimerCountDownValue,1000){
-                override fun onTick(millisUntilFinished: Long) {
-                }
-
-                override fun onFinish() {
-                    _showDialog.postValue(false)
-                }
-            }
-            timerError.start()
+    private fun startTimerCountDown(){
+        viewModelScope.launch(Dispatchers.IO){
+            delay(errorTimeCountDownValue)
+            _showDialog.postValue(false)
         }
-
     }
 
     private fun isValidEmailFormat(email: String?): Boolean =
@@ -217,7 +206,6 @@ class LoginViewModel @Inject constructor(
     }
 
     fun setOriginalValues() {
-        if (::timerError.isInitialized) timerError.cancel()
         _email.value = ""
         _password.value = ""
         _showAnimation.value = false

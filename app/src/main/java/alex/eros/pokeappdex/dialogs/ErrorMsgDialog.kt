@@ -45,7 +45,7 @@ fun ErroMsgDialog(msg:String,isError:Boolean){
                 .padding(vertical = 8.dp, horizontal = 8.dp)
                 .height(intrinsicSize = IntrinsicSize.Min),
             color = Color.White,
-            fontSize = 17.sp,
+            fontSize = 12.sp,
         )
     }
 }

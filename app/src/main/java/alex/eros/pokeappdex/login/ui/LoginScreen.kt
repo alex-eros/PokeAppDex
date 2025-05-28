@@ -2,8 +2,8 @@ package alex.eros.pokeappdex.login.ui
 
 import alex.eros.pokeappdex.R
 import alex.eros.pokeappdex.dialogs.ErroMsgDialog
-import alex.eros.pokeappdex.navigation.Routes
 import alex.eros.pokeappdex.login.viewModels.LoginViewModel
+import alex.eros.pokeappdex.navigation.Routes
 import alex.eros.pokeappdex.utils.ScreenMetrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
@@ -11,12 +11,34 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -35,7 +57,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.*
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
@@ -49,74 +75,44 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val isInvalidDataEmail:Boolean by loginViewModel.isInvalidDataEmail.observeAsState(false)
     val isInvalidDataPassWord:Boolean by loginViewModel.isInvalidDataPassWord.observeAsState(false)
     val isErrorMessage:Boolean by loginViewModel.isErrorMessage.observeAsState(false)
-    val dialogMessage:String by loginViewModel.dialogMessage.observeAsState("Mensaje")
+    val dialogMessage:String by loginViewModel.dialogMessage.observeAsState(initial = "Mensaje")
     val showErrorInvalidEmail:String by loginViewModel.showErrorInvalidEMail.observeAsState("Enter your registered email")
     val showErrorInvalidPassWord:String by loginViewModel.showErrorInvalidPassWord.observeAsState("Enter your registered password")
     var showPassWord by rememberSaveable { mutableStateOf(false) }
     val progress by animateLottieCompositionAsState(composition = loadingAnimation, isPlaying = showAnimation, iterations = LottieConstants.IterateForever)
     val keepSessionActive:Boolean by loginViewModel.keepSessionActive.observeAsState(initial = false)
-    val marginVertical = ScreenMetrics.convertPercentageInDPforScreenHeight(3)
 
-    ConstraintLayout(Modifier.fillMaxSize()){
+    ConstraintLayout(
+        Modifier.fillMaxSize().background(Color(0xFF383838))
+    ) {
+        val (errorMessage,welcomeImage,body,footer) = createRefs()
+        val topGuide1 = createGuidelineFromTop(fraction = .07f)
+        val topGuide3 = createGuidelineFromTop(fraction = .03f)
+        val topGuide2 = createGuidelineFromTop(fraction = .35f)
+        val footerGuide = createGuidelineFromBottom(fraction =.18f)
 
-        val (screen,errorMessage) = createRefs()
-
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(Color(0xFF383838))
-                .constrainAs(screen) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(vertical = marginVertical.dp)
-            ) {
-                Row(modifier = Modifier
-                    .weight(3f)
-                    .padding(top = 12.dp)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.profesor_oak),
-                        contentDescription = "welcome image",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .height(250.dp)
-                            .width(150.dp)
-                    )
-                }
-                Spacer(
-                    modifier = Modifier
-                        .weight(.1f)
-                        .fillMaxWidth()
-                )
+        Image(
+            painter = painterResource(id = R.drawable.profesor_oak),
+            contentDescription = "welcome image",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.height(225.dp).width(125.dp).constrainAs(welcomeImage){
+                end.linkTo(parent.end)
+                start.linkTo(parent.start)
+                top.linkTo(topGuide1)
+            })
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .fillMaxHeight()
                         .background(
                             color = Color.White,
                             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                        )
-                        .weight(5f),
-                ) {
-                    Column(Modifier.align(Alignment.BottomCenter), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(
-                            painter = painterResource(id = R.drawable.poke_ball),
-                            contentDescription = "header login section",
-                            modifier = Modifier
-                                .size(74.dp)
-                        )
-                        Row(modifier = Modifier
-                            .padding(bottom = 14.dp)
-                            .fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "New Trainer?", color = Color(0xFFbdbdbd), modifier = Modifier.padding(end = 8.dp), fontWeight = FontWeight.Bold)
-                            Text(text = "SIGN UP", color = Color(0xFF383838),fontFamily = FontFamily(Font(R.font.press_start2p)), fontSize = 12.sp, modifier = Modifier.clickable {
-                                navController.navigate(Routes.RegisterScreen.route)
-                            })
+                        ).constrainAs(body){
+                            top.linkTo(topGuide2)
+                            end.linkTo(parent.end)
+                            start.linkTo(parent.start)
                         }
-                    }
+                ) {
                     Column(Modifier.fillMaxSize()) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
@@ -281,15 +277,36 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                         }
                     }
                 }
+
+        Column(modifier = Modifier.constrainAs(footer){
+            end.linkTo(parent.end)
+            start.linkTo(parent.start)
+            top.linkTo(footerGuide)
+        }, horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(id = R.drawable.poke_ball),
+                contentDescription = "header login section",
+                modifier = Modifier
+                    .size(74.dp)
+            )
+            Row(modifier = Modifier
+                .padding(bottom = 14.dp)
+                .fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "New Trainer?", color = Color(0xFFbdbdbd), modifier = Modifier.padding(end = 8.dp), fontWeight = FontWeight.Bold)
+                Text(text = "SIGN UP", color = Color(0xFF383838),fontFamily = FontFamily(Font(R.font.press_start2p)), fontSize = 12.sp, modifier = Modifier.clickable {
+                    navController.navigate(Routes.RegisterScreen.route)
+                })
             }
         }
+
+
         Box(modifier = Modifier
             .constrainAs(errorMessage) {
-                bottom.linkTo(parent.bottom)
+                top.linkTo(footerGuide)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }
-            .padding(bottom = 48.dp, start = 40.dp, end = 40.dp)
+            .padding(start = 40.dp, end = 40.dp)
             .shadow(8.dp)
         ) {
             AnimatedVisibility(
